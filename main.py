@@ -5,7 +5,7 @@ import numpy as np
 killer_template_path = "./database/killer/"
 addon_template_path = "./database/addon/"
 surviver_status_template_path = "./database/surviver_status/"
-base_image_path = './database/result/nktk1.jpg'
+base_image_path = './database/result/怨霊.png'
 
 # アイコンの位置ずれを想定した位置バッファ
 location_buffer = 10
@@ -99,13 +99,14 @@ def get_most_reliable_template(base_path, template_path_list, base_image):
         basename = i.split('.')[0]
         results[basename] = result
     results = sorted(results.items(), key=lambda x:x[1], reverse=True)
+    # print(results)
     return results[0]
 
 def template_match(template, base_image):
     result = cv2.matchTemplate(base_image, template, cv2.TM_CCORR_NORMED)
 
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-    return max_val, max_loc
+    return max_val, max_loc, min_val
 
 def rectangle(base_image, top_left_x, top_left_y, bottom_right_x, bottom_right_y):
     top_left = (top_left_x, top_left_y)
