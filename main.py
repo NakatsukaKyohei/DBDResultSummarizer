@@ -2,14 +2,26 @@ import cv2
 import os
 import numpy as np
 
-killer_template_path = "./database/killer/"
-addon_template_path = "./database/addon/"
-surviver_status_template_path = "./database/surviver_status/"
+killer_perk_template_path = "./database/killer/perk"
+killer_template_path = "./database/killer/icon"
+addon_template_path = "./database/killer/addon/"
+surviver_status_template_path = "./database/surviver/status/"
 base_image_path = './database/result/381210_20240907153516_1.png'
 # base_image_path = './database/killer_reference/スカルマーチャント.png'
 
 # アイコンの位置ずれを想定した位置バッファ
 location_buffer = 10
+
+# パークアイコンの位置
+killer_perk_location = [
+    [[187 - location_buffer, 792 - location_buffer], [233 + location_buffer, 838 + location_buffer]],
+    [[243 - location_buffer, 792 - location_buffer], [289 + location_buffer, 838 + location_buffer]],
+    [[298 - location_buffer, 792 - location_buffer], [344 + location_buffer, 838 + location_buffer]],
+    [[354 - location_buffer, 792 - location_buffer], [400 + location_buffer, 838 + location_buffer]],
+]
+
+# キラーアイコンの位置
+killer_location = [[484 - location_buffer, 794 - location_buffer], [524 + location_buffer, 835 + location_buffer]] 
 
 # アドオンアイコンの位置
 # n個目のアドオン / 左上 or 右下 / x座標 or y座標
@@ -17,9 +29,6 @@ addon_location = [
     [[550 - location_buffer, 794 - location_buffer], [591 + location_buffer, 835 + location_buffer]],
     [[597 - location_buffer, 794 - location_buffer], [637 + location_buffer, 835 + location_buffer]]
 ]
-
-# キラーアイコンの位置
-killer_location = [[484 - location_buffer, 794 - location_buffer], [524 + location_buffer, 835 + location_buffer]] 
 
 # サバイバーステータスのアイコンの位置
 # n人目のステータス / 左上 or 右下 / x座標 or y座標
@@ -38,6 +47,28 @@ def main():
     cv2.imshow('base_image', preprocessed_image)
     cv2.waitKey(0) 
     cv2.destroyAllWindows()
+
+    # キラーパークの画像認識
+    first_killer_perk_base_image = preprocessed_image[killer_perk_location[0][0][1]:killer_perk_location[0][1][1], killer_perk_location[0][0][0]:killer_perk_location[0][1][0]]
+    second_killer_perk_base_image = preprocessed_image[killer_perk_location[1][0][1]:killer_perk_location[1][1][1], killer_perk_location[1][0][0]:killer_perk_location[1][1][0]]
+    third_killer_perk_base_image = preprocessed_image[killer_perk_location[2][0][1]:killer_perk_location[2][1][1], killer_perk_location[2][0][0]:killer_perk_location[2][1][0]]
+    fourth_killer_perk_base_image = preprocessed_image[killer_perk_location[3][0][1]:killer_perk_location[3][1][1], killer_perk_location[3][0][0]:killer_perk_location[3][1][0]]
+
+    killer_perk_path_list = os.listdir(killer_perk_template_path)
+    first_killer_perk = get_most_reliable_template(killer_perk_template_path, killer_perk_path_list, first_killer_perk_base_image)
+    second_killer_perk = get_most_reliable_template(killer_perk_template_path, killer_perk_path_list, second_killer_perk_base_image)
+    third_killer_perk = get_most_reliable_template(killer_perk_template_path, killer_perk_path_list, third_killer_perk_base_image)
+    fourth_killer_perk = get_most_reliable_template(killer_perk_template_path, killer_perk_path_list, fourth_killer_perk_base_image)
+
+    print("キラーパーク1: {}".format(first_killer_perk[0]))
+    print("キラーパーク2: {}".format(second_killer_perk[0]))
+    print("キラーパーク3: {}".format(third_killer_perk[0]))
+    print("キラーパーク4: {}".format(fourth_killer_perk[0]))
+
+    rectangle(base_image, killer_perk_location[0][0][0], killer_perk_location[0][0][1], killer_perk_location[0][1][0], killer_perk_location[0][1][1])
+    rectangle(base_image, killer_perk_location[1][0][0], killer_perk_location[1][0][1], killer_perk_location[1][1][0], killer_perk_location[1][1][1])
+    rectangle(base_image, killer_perk_location[2][0][0], killer_perk_location[2][0][1], killer_perk_location[2][1][0], killer_perk_location[2][1][1])
+    rectangle(base_image, killer_perk_location[3][0][0], killer_perk_location[3][0][1], killer_perk_location[3][1][0], killer_perk_location[3][1][1])
 
     # キラーの画像認識
     killer_base_image = preprocessed_image[killer_location[0][1]:killer_location[1][1], killer_location[0][0]:killer_location[1][0]]
