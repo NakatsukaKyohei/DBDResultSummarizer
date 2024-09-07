@@ -5,7 +5,8 @@ import numpy as np
 killer_template_path = "./database/killer/"
 addon_template_path = "./database/addon/"
 surviver_status_template_path = "./database/surviver_status/"
-base_image_path = './database/result/怨霊.png'
+base_image_path = './database/result/381210_20240907153516_1.png'
+# base_image_path = './database/killer_reference/スカルマーチャント.png'
 
 # アイコンの位置ずれを想定した位置バッファ
 location_buffer = 10
@@ -31,17 +32,23 @@ surviver_status_location = [
 
 def main():
     base_image = imread(base_image_path)
+    preprocessed_image = image_preprocess(base_image)
+
+    # 画像を表示
+    cv2.imshow('base_image', preprocessed_image)
+    cv2.waitKey(0) 
+    cv2.destroyAllWindows()
 
     # キラーの画像認識
-    killer_base_image = base_image[killer_location[0][1]:killer_location[1][1], killer_location[0][0]:killer_location[1][0]]
+    killer_base_image = preprocessed_image[killer_location[0][1]:killer_location[1][1], killer_location[0][0]:killer_location[1][0]]
     killer_type = get_most_reliable_template(killer_template_path, os.listdir(killer_template_path), killer_base_image)
     print("キラー: {}".format(killer_type))
 
     rectangle(base_image, killer_location[0][0], killer_location[0][1], killer_location[1][0], killer_location[1][1])
 
     # アドオンの画像認識
-    first_addon_base_image = base_image[addon_location[0][0][1]:addon_location[0][1][1], addon_location[0][0][0]:addon_location[0][1][0]]
-    second_addon_base_image = base_image[addon_location[1][0][1]:addon_location[1][1][1], addon_location[1][0][0]:addon_location[1][1][0]]
+    first_addon_base_image = preprocessed_image[addon_location[0][0][1]:addon_location[0][1][1], addon_location[0][0][0]:addon_location[0][1][0]]
+    second_addon_base_image = preprocessed_image[addon_location[1][0][1]:addon_location[1][1][1], addon_location[1][0][0]:addon_location[1][1][0]]
 
     addon_path_list = os.listdir(addon_template_path + killer_type[0])
     first_addon = get_most_reliable_template(addon_template_path + killer_type[0], addon_path_list, first_addon_base_image)
@@ -53,10 +60,10 @@ def main():
     rectangle(base_image, addon_location[1][0][0], addon_location[1][0][1], addon_location[1][1][0], addon_location[1][1][1])
 
     # サバイバーステータスの画像認識
-    first_surviver_base_image = base_image[surviver_status_location[0][0][1]:surviver_status_location[0][1][1], surviver_status_location[0][0][0]:surviver_status_location[0][1][0]]
-    second_surviver_base_image = base_image[surviver_status_location[1][0][1]:surviver_status_location[1][1][1], surviver_status_location[1][0][0]:surviver_status_location[1][1][0]]
-    third_surviver_base_image = base_image[surviver_status_location[2][0][1]:surviver_status_location[2][1][1], surviver_status_location[2][0][0]:surviver_status_location[2][1][0]]
-    fourth_surviver_base_image = base_image[surviver_status_location[3][0][1]:surviver_status_location[3][1][1], surviver_status_location[3][0][0]:surviver_status_location[3][1][0]]
+    first_surviver_base_image = preprocessed_image[surviver_status_location[0][0][1]:surviver_status_location[0][1][1], surviver_status_location[0][0][0]:surviver_status_location[0][1][0]]
+    second_surviver_base_image = preprocessed_image[surviver_status_location[1][0][1]:surviver_status_location[1][1][1], surviver_status_location[1][0][0]:surviver_status_location[1][1][0]]
+    third_surviver_base_image = preprocessed_image[surviver_status_location[2][0][1]:surviver_status_location[2][1][1], surviver_status_location[2][0][0]:surviver_status_location[2][1][0]]
+    fourth_surviver_base_image = preprocessed_image[surviver_status_location[3][0][1]:surviver_status_location[3][1][1], surviver_status_location[3][0][0]:surviver_status_location[3][1][0]]
 
     surviver_status_path_list = os.listdir(surviver_status_template_path)
     first_surviver_status = get_most_reliable_template(surviver_status_template_path, surviver_status_path_list, first_surviver_base_image)
@@ -74,12 +81,7 @@ def main():
     rectangle(base_image, surviver_status_location[2][0][0], surviver_status_location[2][0][1], surviver_status_location[2][1][0], surviver_status_location[2][1][1])
     rectangle(base_image, surviver_status_location[3][0][0], surviver_status_location[3][0][1], surviver_status_location[3][1][0], surviver_status_location[3][1][1])
 
-
-
-    # 画像を表示
-    cv2.imshow('base_image', base_image)
-    cv2.waitKey(0) 
-    cv2.destroyAllWindows()
+    show_image(base_image)
 
 def imread(filename, flags=cv2.IMREAD_COLOR, dtype=np.uint8):
     try:
@@ -90,16 +92,23 @@ def imread(filename, flags=cv2.IMREAD_COLOR, dtype=np.uint8):
         print(e)
         return None
 
+def image_preprocess(img, C=0.5):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gaussian = cv2.GaussianBlur(gray, (5, 5), 0)
+    threshold = cv2.adaptiveThreshold(gaussian, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, C)
+    return threshold
+
 def get_most_reliable_template(base_path, template_path_list, base_image):
     results = {}
     for i in template_path_list:
         path = "{}/{}".format(base_path, i)
-        template = imread(path)
+        template = image_preprocess(imread(path))
         result = template_match(template, base_image)
         basename = i.split('.')[0]
         results[basename] = result
     results = sorted(results.items(), key=lambda x:x[1], reverse=True)
     # print(results)
+
     return results[0]
 
 def template_match(template, base_image):
@@ -114,7 +123,10 @@ def rectangle(base_image, top_left_x, top_left_y, bottom_right_x, bottom_right_y
     cv2.rectangle(base_image, top_left, bottom_right, (255, 255, 0), 2)
     return
 
-
+def show_image(image, title="base"):
+    cv2.imshow(title, image)
+    cv2.waitKey(0) 
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
