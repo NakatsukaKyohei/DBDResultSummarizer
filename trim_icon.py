@@ -2,10 +2,10 @@ import cv2
 import os
 import numpy as np
 
-addon_reference_path = "./database/reference/surviver/item"
+addon_reference_path = "./database/reference/surviver/addon/light"
 perk_reference_path = "./database/reference/killer/perk"
-output_path = "./database/surviver/item/"
-# killer addon 0 / surviver addon 1 / perk 2 / surviver item 3
+output_path = "./database/surviver/addon/light/"
+# killer addon 0 / surviver addon 1 / perk 2 / surviver item 3 / 単発アドオン 3
 trim_mode = 3
 
 addon_location = [
