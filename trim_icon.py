@@ -2,11 +2,11 @@ import cv2
 import os
 import numpy as np
 
-addon_reference_path = "./database/reference/surviver/addon"
+addon_reference_path = "./database/reference/surviver/item"
 perk_reference_path = "./database/reference/killer/perk"
-output_path = "./database/killer/perk/"
-# killer addon 0 / surviver addon 1 / perk 2
-trim_mode = 2
+output_path = "./database/surviver/item/"
+# killer addon 0 / surviver addon 1 / perk 2 / surviver item 3
+trim_mode = 3
 
 addon_location = [
     [[398, 561], [486, 649]],
@@ -53,25 +53,33 @@ crop_location = np.array([
 ])
 
 def main():
-    if trim_mode == 0 or trim_mode == 1:
+    if trim_mode == 0 or trim_mode == 1 or trim_mode == 3:
         addon_reference_path_list = os.listdir(addon_reference_path)
         print(addon_reference_path_list)
-        for i in addon_reference_path_list:
-            preference_list = os.listdir("{}/{}".format(addon_reference_path, i))
-            print("{}/{}/{}".format(addon_reference_path, i, preference_list[0]))
-            base_image_1 = imread("{}/{}/{}".format(addon_reference_path, i, preference_list[0]))
-            
-            for j in range(15):
-                addon_image = base_image_1[addon_location[j][0][1]:addon_location[j][1][1], addon_location[j][0][0]:addon_location[j][1][0]]
-                addon_image = cv2.resize(addon_image, (37, 37))
-                imwrite("{}/{}/{}.png".format(output_path, i, j), addon_image)
-
-            if trim_mode == 0:
-                base_image_2 = imread("{}/{}/{}".format(addon_reference_path, i, preference_list[1]))
-                for j in range(5):
-                    addon_image = base_image_2[addon_location[j][0][1]:addon_location[j][1][1], addon_location[j][0][0]:addon_location[j][1][0]]
+        if trim_mode == 3:
+            for index, i in enumerate(addon_reference_path_list):
+                base_image = imread("{}/{}".format(addon_reference_path, i))
+                for j in range(15):
+                    addon_image = base_image[addon_location[j][0][1]:addon_location[j][1][1], addon_location[j][0][0]:addon_location[j][1][0]]
                     addon_image = cv2.resize(addon_image, (37, 37))
-                    imwrite("{}/{}/{}.png".format(output_path, i, j + 15), addon_image)
+                    imwrite("{}{}_{}.png".format(output_path, index, j), addon_image)
+        else:
+            for i in addon_reference_path_list:
+                preference_list = os.listdir("{}/{}".format(addon_reference_path, i))
+                print("{}/{}/{}".format(addon_reference_path, i, preference_list[0]))
+                base_image_1 = imread("{}/{}/{}".format(addon_reference_path, i, preference_list[0]))
+                
+                for j in range(15):
+                    addon_image = base_image_1[addon_location[j][0][1]:addon_location[j][1][1], addon_location[j][0][0]:addon_location[j][1][0]]
+                    addon_image = cv2.resize(addon_image, (37, 37))
+                    imwrite("{}/{}/{}.png".format(output_path, i, j), addon_image)
+
+                if trim_mode == 0:
+                    base_image_2 = imread("{}/{}/{}".format(addon_reference_path, i, preference_list[1]))
+                    for j in range(5):
+                        addon_image = base_image_2[addon_location[j][0][1]:addon_location[j][1][1], addon_location[j][0][0]:addon_location[j][1][0]]
+                        addon_image = cv2.resize(addon_image, (37, 37))
+                        imwrite("{}/{}/{}.png".format(output_path, i, j + 15), addon_image)
     elif trim_mode == 2:
         perk_reference_list = os.listdir(perk_reference_path)
         for i, file in enumerate(perk_reference_list):

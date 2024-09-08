@@ -7,6 +7,7 @@ killer_icon_template_path = "./database/killer/icon"
 killer_addon_template_path = "./database/killer/addon/"
 surviver_status_template_path = "./database/surviver/status/"
 surviver_perk_template_path = "./database/surviver/perk"
+surviver_item_template_path = "./database/surviver/item"
 base_image_path = './database/result/381210_20240907153516_1.png'
 # base_image_path = './database/killer_reference/スカルマーチャント.png'
 
@@ -24,7 +25,7 @@ killer_perk_location = [
 # キラーアイコンの位置
 killer_location = [[484 - location_buffer, 794 - location_buffer], [524 + location_buffer, 835 + location_buffer]] 
 
-# アドオンアイコンの位置
+# キラーアドオンアイコンの位置
 # n個目のアドオン / 左上 or 右下 / x座標 or y座標
 addon_location = [
     [[550 - location_buffer, 794 - location_buffer], [591 + location_buffer, 835 + location_buffer]],
@@ -46,6 +47,11 @@ surviver_perk_location = [
     [187, 243, 298, 354],
     [310, 430, 551, 672]
 ]
+
+# サバイバーアイテムの位置(左上)
+surviver_item_width = 41
+surviver_item_location_x = 484
+surviver_item_location_y = [312, 432, 552, 674]
 
 
 def main():
@@ -135,8 +141,25 @@ def main():
             rectangle(base_image, left_top_x, left_top_y, bottom_right_x, bottom_right_y)
 
             surviver_perks_i.append(get_most_reliable_template(surviver_perk_template_path, surviver_perk_path_list, perk_base_image, 2))
+        surviver_perks.append(surviver_perks.append(surviver_perks_i))
         print("{}人目サバイバーパーク: {} / {} / {} / {}".format(i+1, surviver_perks_i[0][0], surviver_perks_i[1][0], surviver_perks_i[2][0], surviver_perks_i[3][0]))
 
+    # サバイバーアイテムの画像認識
+    surviver_items = []
+    surviver_item_path_list = os.listdir(surviver_item_template_path)
+    # i人目のアイテム
+    for i in range(4):
+        left_top_x = surviver_item_location_x - location_buffer
+        left_top_y = surviver_item_location_y[i] - location_buffer
+        bottom_right_x = left_top_x + surviver_item_width + (location_buffer * 2)
+        bottom_right_y = left_top_y + surviver_item_width + (location_buffer * 2)
+        
+        item_base_image = preprocessed_image_for_other[left_top_y:bottom_right_y, left_top_x:bottom_right_x]
+
+        rectangle(base_image, left_top_x, left_top_y, bottom_right_x, bottom_right_y)
+
+        surviver_items.append(get_most_reliable_template(surviver_item_template_path, surviver_item_path_list, item_base_image))
+        print("{}人目サバイバーアイテム: {}".format(i+1, surviver_items[i][0]))
 
     show_image(base_image)
 
